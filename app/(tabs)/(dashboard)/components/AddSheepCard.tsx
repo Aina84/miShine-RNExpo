@@ -1,22 +1,23 @@
+import { db } from '@/lib/database/db'
+import { sheeps } from '@/lib/database/schema'
+import { Check, ChevronDown, ChevronUp, X } from '@tamagui/lucide-icons'
 import React, { useState } from 'react'
 import {
+  Adapt,
   Button,
-  Card,
   H4,
   Input,
   Label,
+  PortalProvider,
+  ScrollView,
+  Select,
+  Separator,
+  Sheet,
+  Text,
   TextArea,
   XStack,
-  YStack,
-  Text,
-  Select,
-  ScrollView,
-  Separator,
+  YStack
 } from 'tamagui'
-import { ChevronDown } from '@tamagui/lucide-icons'
-import { useToastController } from '@tamagui/toast'
-import { db } from '@/lib/database/db' // Ajuste le chemin selon ton projet
-import { sheeps } from '@/lib/database/schema'
 
 type PersonForm = {
   name: string
@@ -26,16 +27,15 @@ type PersonForm = {
   role: string
 }
 
-const ROLES = ['pasteur', 'decone', 'choral', 'securité', 'interceseur']
+const ROLES = ['Choral', 'Securité', 'Interceseur', 'Accueil', 'Diakona', 'Assistant', 'Staff', 'Tsotra']
 
-type AddPersonCardProps = {
+type AddSheepCardProps = {
+  visible: boolean
+  onClose: () => void
   onUserAdded?: () => void
-  onCancel?: () => void
 }
 
-export function AddSheepCard({ onUserAdded, onCancel }: AddPersonCardProps) {
-  const toast = useToastController()
-  const [isVisible, setIsVisible] = useState(false)
+export function AddSheepCard({ visible, onClose, onUserAdded }: AddSheepCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [form, setForm] = useState<PersonForm>({
     name: '',
@@ -66,7 +66,6 @@ export function AddSheepCard({ onUserAdded, onCancel }: AddPersonCardProps) {
 
     setIsSubmitting(true)
     try {
-      // Insertion dans la base de données
       await db.insert(sheeps).values({
         name: form.name,
         contact: form.contact,
@@ -75,21 +74,13 @@ export function AddSheepCard({ onUserAdded, onCancel }: AddPersonCardProps) {
         role: form.role || null,
       })
 
-      toast.show('Succès !', {
-        message: 'La personne a été ajoutée avec succès',
-        customData: { type: 'success' },
-        duration: 3000,
-      })
+      console.log('Succès ! La personne a été ajoutée avec succès')
 
       resetForm()
-      setIsVisible(false)
+      onClose()
       onUserAdded?.()
     } catch (error) {
-      toast.show('Erreur', {
-        message: "Impossible d'ajouter la personne",
-        customData: { type: 'error' },
-        duration: 4000,
-      })
+      console.log("Erreur : Impossible d'ajouter la personne")
       console.error(error)
     } finally {
       setIsSubmitting(false)
@@ -98,8 +89,7 @@ export function AddSheepCard({ onUserAdded, onCancel }: AddPersonCardProps) {
 
   const handleCancel = () => {
     resetForm()
-    setIsVisible(false)
-    onCancel?.()
+    onClose()
   }
 
   const setField = (field: keyof PersonForm) => (value: string) => {
@@ -107,234 +97,241 @@ export function AddSheepCard({ onUserAdded, onCancel }: AddPersonCardProps) {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
   }
 
-  // Si la carte n'est pas visible, afficher juste le bouton
-  if (!isVisible) {
-    return (
-      <Button
-        onPress={() => setIsVisible(true)}
-        backgroundColor="$blue10"
-        size="$4"
-        pressStyle={{ opacity: 0.85 }}
-      >
-        Ajouter une personne
-      </Button>
-    )
-  }
-
-  // Carte de formulaire visible
   return (
-    <YStack 
-      position="absolute" 
-      top={0} 
-      left={0} 
-      right={0} 
-      bottom={0}
-      backgroundColor="rgba(0,0,0,0.3)"
-      justifyContent="center"
-      alignItems="center"
-      padding="$4"
-      zIndex={1000}
-    >
-      <Card
-        elevation={100}
-        size="$4"
-        border='1px solid'
-        enterStyle={{ scale: 0.9, opacity: 0 }}
-        exitStyle={{ scale: 0.9, opacity: 0 }}
-        opacity={1}
-        scale={1}
-        width="100%"
-        maxWidth={500}
-        backgroundColor="$backgroundStrong"
-        borderRadius="$6"
+    <PortalProvider shouldAddRootHost>
+      <Sheet
+        modal
+        open={visible}
+        onOpenChange={(open: boolean) => { if (!open) handleCancel() }}
+        snapPoints={[85]}
+        dismissOnSnapToBottom
+        dismissOnOverlayPress
+        zIndex={100000}
       >
-        <ScrollView 
-          maxHeight="90%"
-          showsVerticalScrollIndicator={false}
-          padding="$4"
+        <Sheet.Overlay
+          backgroundColor="rgba(0,0,0,0.5)"
+        />
+        <Sheet.Handle />
+        <Sheet.Frame
+          padding="$10"
+          backgroundColor="$backgroundStrong"
+          borderTopLeftRadius="$6"
+          borderTopRightRadius="$6"
         >
-          <YStack gap="$4">
-            {/* En-tête avec bouton de fermeture */}
-            <XStack justifyContent="space-between" alignItems="center">
-              <YStack>
-                <H4 color="$color" fontWeight="700">
-                  ➕ Nouvelle Personne
-                </H4>
-                <Text color="$gray10" fontSize="$3" marginTop="$1">
-                  Remplissez les informations ci-dessous
-                </Text>
-              </YStack>
-              <Button
-                size="$3"
-                circular
-                onPress={handleCancel}
-                backgroundColor="transparent"
-                pressStyle={{ opacity: 0.5 }}
-              />
-            </XStack>
-
-            <Separator />
-
-            {/* Formulaire */}
-            <YStack gap="$3">
-              {/* Nom */}
-              <YStack gap="$1">
-                <Label htmlFor="name" color="$color" fontSize="$3" fontWeight="600">
-                  Nom <Text color="$red10">*</Text>
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="Ex: Jean Dupont"
-                  value={form.name}
-                  onChangeText={setField('name')}
-                  borderColor={errors.name ? '$red8' : '$borderColor'}
-                  focusStyle={{ borderColor: '$blue8' }}
-                  size="$4"
-                  disabled={isSubmitting}
-                />
-                {errors.name && (
-                  <Text color="$red10" fontSize="$2">
-                    {errors.name}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <YStack gap="$4">
+              {/* En-tête avec bouton de fermeture */}
+              <XStack justifyContent="space-between" alignItems="center">
+                <YStack>
+                  <H4 color="$color" fontWeight="700">
+                    ➕ Nouvelle Personne
+                  </H4>
+                  <Text color="$gray10" fontSize="$3" marginTop="$1">
+                    Remplissez les informations ci-dessous
                   </Text>
-                )}
-              </YStack>
-
-              {/* Contact */}
-              <YStack gap="$1">
-                <Label htmlFor="contact" color="$color" fontSize="$3" fontWeight="600">
-                  Contact <Text color="$red10">*</Text>
-                </Label>
-                <Input
-                  id="contact"
-                  placeholder="Ex: +261 34 00 000 00"
-                  value={form.contact}
-                  onChangeText={setField('contact')}
-                  keyboardType="phone-pad"
-                  borderColor={errors.contact ? '$red8' : '$borderColor'}
-                  focusStyle={{ borderColor: '$blue8' }}
-                  size="$4"
-                  disabled={isSubmitting}
+                </YStack>
+                <Button
+                  size="$3"
+                  circular
+                  onPress={handleCancel}
+                  backgroundColor="transparent"
+                  pressStyle={{ opacity: 0.5 }}
+                  icon={<X size={16} />}
                 />
-                {errors.contact && (
-                  <Text color="$red10" fontSize="$2">
-                    {errors.contact}
-                  </Text>
-                )}
-              </YStack>
+              </XStack>
 
-              {/* Adresse */}
-              <YStack gap="$1">
-                <Label htmlFor="adress" color="$color" fontSize="$3" fontWeight="600">
-                  Adresse <Text color="$red10">*</Text>
-                </Label>
-                <Input
-                  id="adress"
-                  placeholder="Ex: Lot 12, Antananarivo"
-                  value={form.adress}
-                  onChangeText={setField('adress')}
-                  borderColor={errors.adress ? '$red8' : '$borderColor'}
-                  focusStyle={{ borderColor: '$blue8' }}
-                  size="$4"
-                  disabled={isSubmitting}
-                />
-                {errors.adress && (
-                  <Text color="$red10" fontSize="$2">
-                    {errors.adress}
-                  </Text>
-                )}
-              </YStack>
+              <Separator />
 
-              {/* Description */}
-              <YStack gap="$1">
-                <Label htmlFor="description" color="$color" fontSize="$3" fontWeight="600">
-                  Description <Text color="$red10">*</Text>
-                </Label>
-                <TextArea
-                  id="description"
-                  placeholder="Décrivez cette personne..."
-                  value={form.description}
-                  onChangeText={setField('description')}
-                  borderColor={errors.description ? '$red8' : '$borderColor'}
-                  focusStyle={{ borderColor: '$blue8' }}
-                  size="$4"
-                  numberOfLines={3}
-                  minHeight={80}
-                  disabled={isSubmitting}
-                />
-                {errors.description && (
-                  <Text color="$red10" fontSize="$2">
-                    {errors.description}
-                  </Text>
-                )}
-              </YStack>
-
-              {/* Rôle */}
-              <YStack gap="$1">
-                <Label color="$color" fontSize="$3" fontWeight="600">
-                  Rôle <Text color="$gray9">(optionnel)</Text>
-                </Label>
-                <Select 
-                  value={form.role} 
-                  onValueChange={setField('role')}
-                  disablePreventBodyScroll
-                >
-                  <Select.Trigger
-                    iconAfter={ChevronDown}
-                    size="$4"
-                    borderColor="$borderColor"
+              {/* Formulaire */}
+              <YStack gap="$3">
+                {/* Nom */}
+                <YStack gap="$1">
+                  <Label htmlFor="name" color="$color" fontSize="$3" fontWeight="600">
+                    Nom <Text color="$red10">*</Text>
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="Ex: Jean Dupont"
+                    value={form.name}
+                    onChangeText={setField('name')}
+                    borderColor={errors.name ? '$red8' : '$borderColor'}
                     focusStyle={{ borderColor: '$blue8' }}
+                    size="$4"
+                    disabled={isSubmitting}
+                  />
+                  {errors.name && (
+                    <Text color="$red10" fontSize="$2">{errors.name}</Text>
+                  )}
+                </YStack>
+
+                {/* Contact */}
+                <YStack gap="$1">
+                  <Label htmlFor="contact" color="$color" fontSize="$3" fontWeight="600">
+                    Contact <Text color="$red10">*</Text>
+                  </Label>
+                  <Input
+                    id="contact"
+                    placeholder="Ex: +261 34 00 000 00"
+                    value={form.contact}
+                    onChangeText={setField('contact')}
+                    keyboardType="phone-pad"
+                    borderColor={errors.contact ? '$red8' : '$borderColor'}
+                    focusStyle={{ borderColor: '$blue8' }}
+                    size="$4"
+                    disabled={isSubmitting}
+                  />
+                  {errors.contact && (
+                    <Text color="$red10" fontSize="$2">{errors.contact}</Text>
+                  )}
+                </YStack>
+
+                {/* Adresse */}
+                <YStack gap="$1">
+                  <Label htmlFor="adress" color="$color" fontSize="$3" fontWeight="600">
+                    Adresse <Text color="$red10">*</Text>
+                  </Label>
+                  <Input
+                    id="adress"
+                    placeholder="Ex: Lot 12, Antananarivo"
+                    value={form.adress}
+                    onChangeText={setField('adress')}
+                    borderColor={errors.adress ? '$red8' : '$borderColor'}
+                    focusStyle={{ borderColor: '$blue8' }}
+                    size="$4"
+                    disabled={isSubmitting}
+                  />
+                  {errors.adress && (
+                    <Text color="$red10" fontSize="$2">{errors.adress}</Text>
+                  )}
+                </YStack>
+
+                {/* Description */}
+                <YStack gap="$1">
+                  <Label htmlFor="description" color="$color" fontSize="$3" fontWeight="600">
+                    Description <Text color="$red10">*</Text>
+                  </Label>
+                  <TextArea
+                    id="description"
+                    placeholder="Décrivez cette personne..."
+                    value={form.description}
+                    onChangeText={setField('description')}
+                    borderColor={errors.description ? '$red8' : '$borderColor'}
+                    focusStyle={{ borderColor: '$blue8' }}
+                    size="$4"
+                    numberOfLines={3}
+                    minHeight={80}
+                    disabled={isSubmitting}
+                  />
+                  {errors.description && (
+                    <Text color="$red10" fontSize="$2">{errors.description}</Text>
+                  )}
+                </YStack>
+
+                {/* Rôle */}
+                <YStack gap="$1">
+                  <Label color="$color" fontSize="$3" fontWeight="600">
+                    Rôle <Text color="$gray9">(optionnel)</Text>
+                  </Label>
+                  <Select
+                    value={form.role}
+                    onValueChange={setField('role')}
+                  >
+                    <Select.Trigger iconAfter={ChevronDown}>
+                      <Select.Value placeholder="Sélectionner un rôle..." />
+                    </Select.Trigger>
+
+                    <Adapt when="sm" platform="touch">
+                      <Sheet
+                        modal
+                        dismissOnSnapToBottom
+                      >
+                        <Sheet.Frame>
+                          <Sheet.Handle />
+                          <Adapt.Contents />
+                        </Sheet.Frame>
+                        <Sheet.Overlay
+                          enterStyle={{ opacity: 0 }}
+                          exitStyle={{ opacity: 0 }}
+                        />
+                      </Sheet>
+                    </Adapt>
+
+                    <Select.Content zIndex={200000}>
+                      <Select.ScrollUpButton
+                        alignItems="center"
+                        justifyContent="center"
+                        position="relative"
+                        width="100%"
+                        height="$3"
+                      >
+                        <YStack zIndex={10}>
+                          <ChevronUp size={20} />
+                        </YStack>
+                      </Select.ScrollUpButton>
+
+                      <Select.Viewport minWidth={200}>
+                        <Select.Group>
+                          <Select.Label>Options</Select.Label>
+                          {ROLES.map((role, i) => (
+                            <Select.Item
+                              index={i}
+                              key={role}
+                              value={role}
+                            >
+                              <Select.ItemText>{role}</Select.ItemText>
+                              <Select.ItemIndicator marginLeft="auto">
+                                <Check size={16} />
+                              </Select.ItemIndicator>
+                            </Select.Item>
+                          ))}
+                        </Select.Group>
+                      </Select.Viewport>
+
+                      <Select.ScrollDownButton
+                        alignItems="center"
+                        justifyContent="center"
+                        position="relative"
+                        width="100%"
+                        height="$3"
+                      >
+                        <YStack zIndex={10}>
+                          <ChevronDown size={20} />
+                        </YStack>
+                      </Select.ScrollDownButton>
+                    </Select.Content>
+                  </Select>
+                </YStack>
+
+                {/* Actions */}
+                <XStack gap="$3" marginTop="$4" marginBottom="$6">
+                  <Button
+                    onPress={handleCancel}
+                    variant="outlined"
+                    borderColor="$borderColor"
+                    size="$4"
+                    flex={1}
                     disabled={isSubmitting}
                   >
-                    <Select.Value placeholder="Sélectionner un rôle" />
-                  </Select.Trigger>
-
-                  <Select.Content zIndex={200000}>
-                    <Select.ScrollUpButton />
-                    <Select.Viewport>
-                      <Select.Group>
-                        <Select.Label>Rôles disponibles</Select.Label>
-                        {ROLES.map((role, i) => (
-                          <Select.Item key={role} index={i} value={role}>
-                            <Select.ItemText>{role}</Select.ItemText>
-                            <Select.ItemIndicator marginLeft="auto">
-                              <Text>✓</Text>
-                            </Select.ItemIndicator>
-                          </Select.Item>
-                        ))}
-                      </Select.Group>
-                    </Select.Viewport>
-                    <Select.ScrollDownButton />
-                  </Select.Content>
-                </Select>
+                    Annuler
+                  </Button>
+                  <Button
+                    onPress={handleSubmit}
+                    backgroundColor="$blue10"
+                    size="$4"
+                    flex={1}
+                    pressStyle={{ opacity: 0.85 }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+                  </Button>
+                </XStack>
               </YStack>
-
-              {/* Actions */}
-              <XStack gap="$3" marginTop="$4">
-                <Button
-                  onPress={handleCancel}
-                  variant="outlined"
-                  borderColor="$borderColor"
-                  size="$4"
-                  flex={1}
-                  disabled={isSubmitting}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  onPress={handleSubmit}
-                  backgroundColor="$blue10"
-                  size="$4"
-                  flex={1}
-                  pressStyle={{ opacity: 0.85 }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
-                </Button>
-              </XStack>
             </YStack>
-          </YStack>
-        </ScrollView>
-      </Card>
-    </YStack>
+
+          </ScrollView>
+
+        </Sheet.Frame>
+      </Sheet>
+    </PortalProvider>
   )
 }

@@ -1,36 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Platform,
-  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
+  Text
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { View } from "tamagui";
 
-import { styles } from "@/app/utils/styles";
-import { COLORS } from "@/app/utils/styles";
+import { COLORS, styles } from "@/app/utils/styles";
 import { STATS } from "./components/StatCard";
 
-import { StatCard } from "./components/StatCard";
 import { ActionButton } from "./components/ActionButton";
 import { ChartSection } from "./components/ChartSection";
 import { Header } from "./components/Header";
 import { RecentActivity } from "./components/RecentActivity";
+import { StatCard } from "./components/StatCard";
 
 import { AddSheepCard } from "./components/AddSheepCard";
 
-import { useWindowDimensions } from "tamagui";
+
 
 export default function DashboardScreen() {
   const [refreshing] = useState(false);
   const [addClicked, setAddClicked] = useState<boolean | null>(null);
-  const {height,width} = useWindowDimensions()
+  
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} />
@@ -41,11 +36,12 @@ export default function DashboardScreen() {
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
-      {addClicked && 
-      <View flex={1} alignItems="center" justifyContent="center" height={height} backgroundColor={'$colorTransparent'}>
-        <AddSheepCard></AddSheepCard>
-      </View>
-      }
+
+      <AddSheepCard
+        visible={addClicked === true}
+        onClose={() => setAddClicked(null)}
+        onUserAdded={() => setAddClicked(null)}
+      />
 
       {/* Background decorative circles */}
       <View style={styles.bgCircle1} />
