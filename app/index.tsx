@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native'
 import { Hand } from '@tamagui/lucide-icons'
 import { YStack, Button, Text } from 'tamagui'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRouter } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
 import { COLORS } from './utils/styles'
@@ -19,6 +19,7 @@ export default function index() {
   
   const { success, error } = useMigrations(db, migration);
   
+ 
   if (success) {
     console.log('Migration réussie');
   }

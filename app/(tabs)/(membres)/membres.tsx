@@ -34,7 +34,7 @@ export default function MembresScreen() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tous");
   const headerAnim = useRef(new Animated.Value(0)).current;
-  const [members, setMembers] = useState<Member[]>([])
+  const [members, setMembers] = useState<any[]>([])
   const [showAddSheepCard, setShowAddSheepCard] = useState<boolean | null>(null)
 
   useEffect(()=>{
@@ -53,33 +53,9 @@ export default function MembresScreen() {
     Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
   }, []);
 
-  const filtered = members?.filter((m : Member) => {
-    const matchQuery = m.name.toLowerCase().includes(query.toLowerCase()) || m.role?.toLowerCase().includes(query.toLowerCase());
-    switch(activeFilter){
-      case 'Actifs':
-        return m.status=='actif'
-      case 'Inactifs':
-        return m.status=='inactif'
-      case 'Chorals' :
-        return m.role=="Choral"
-      case 'Securités':
-        return m.role== 'Securité'
-      case 'Interceseurs':
-        return m.role=="Interceseur"
-      case 'Accueils':
-        return m.role=='Accueil' 
-      case 'Diakona':
-        return m.role== 'Diakona'
-      case 'Assistants':
-        return m.role=='Assistant'
-      case 'Staffs':
-        return m.role=='Staff'
-      case 'Tsotra':
-        return m.role=='Tsotra'
-      case 'Tous':
-        return m
-    }
-    return matchQuery;
+  const filtered = members.filter((r) => {
+    if (activeFilter === "Tous") return true;
+    return r.role.toLowerCase() === activeFilter.toLowerCase();
   });
 
   return (
