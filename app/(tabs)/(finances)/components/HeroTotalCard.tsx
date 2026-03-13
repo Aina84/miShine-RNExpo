@@ -3,16 +3,19 @@
  * Stack: React Native Expo + Tamagui
  */
 
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../../../utils/styles";
 
 interface HeroTotalCardProps {
   heroSlide: Animated.Value;
+  totalIncome: number;
+  totalExpense: number;
 }
 
-export function HeroTotalCard({ heroSlide }: HeroTotalCardProps) {
+export function HeroTotalCard({ heroSlide, totalIncome, totalExpense }: HeroTotalCardProps) {
+  const balance = totalIncome - totalExpense;
   return (
     <Animated.View style={[styles.heroWrap, { transform: [{ translateY: heroSlide }] }]}>
       <View style={styles.heroInner}>
@@ -27,12 +30,12 @@ export function HeroTotalCard({ heroSlide }: HeroTotalCardProps) {
         <View style={styles.heroGlow} />
 
         <View style={{ position: "relative", zIndex: 1 }}>
-          <Text style={styles.heroLabel}>Total Cumulé 2025</Text>
-          <Text style={styles.heroAmount}>383 500 XAF</Text>
-          <Text style={styles.heroGrowth}>↑ +24% comparé à 2024</Text>
+          <Text style={styles.heroLabel}>Solde Actuel</Text>
+          <Text style={styles.heroAmount}>{balance.toLocaleString()} Ar</Text>
+          <Text style={styles.heroGrowth}>Total des entrées</Text>
 
           <View style={styles.heroMinis}>
-            {[["Ce mois", "91 500"], ["Semaine", "23 400"], ["Dîmes", "145 200"]].map(([lbl, val]) => (
+            {[["Entrées", `${totalIncome.toLocaleString()} Ar`], ["Sorties", `${totalExpense.toLocaleString()} Ar`]].map(([lbl, val]) => (
               <View key={lbl} style={styles.heroMini}>
                 <Text style={styles.heroMiniLabel}>{lbl}</Text>
                 <Text style={styles.heroMiniVal}>{val}</Text>

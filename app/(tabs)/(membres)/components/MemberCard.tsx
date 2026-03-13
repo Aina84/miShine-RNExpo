@@ -1,26 +1,30 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { COLORS } from "../../../utils/styles";
+import { Animated, Pressable, StyleSheet, Text } from "react-native";
+import { View } from "tamagui";
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 export type Member = {
-    id: number;
-    name: string;
-    contact: string;
-    adress: string;
-    description: string;
-    role: string | null;
-    sexe: string | null;
-    status: string | null;
-    createdAt: Date | null;
+  id: number;
+  name: string;
+  contact: string;
+  adress: string;
+  description: string;
+  role: string | null;
+  sexe: string | null;
+  status: string | null;
+  createdAt: Date | null;
 }
 
 interface MemberCardProps {
   item: Member;
   index: number;
+  onPress?: (member: Member) => void;
 }
 
-export function MemberCard({ item, index }: MemberCardProps) {
-  const emoji = item.sexe=="homme"? '👨':'👩';
+export function MemberCard({ item, index, onPress }: MemberCardProps) {
+  const COLORS = useAppColors();
+
+  const emoji = item.sexe == "homme" ? '👨' : '👩';
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
@@ -37,23 +41,34 @@ export function MemberCard({ item, index }: MemberCardProps) {
 
   return (
     <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }, { scale: pressAnim }] }}>
-      <Pressable onPressIn={onIn} onPressOut={onOut} style={styles.memberCard}>
-        <View style={[styles.memberAvatar, { backgroundColor: "rgba(152,123,160,80)" }]}>
+      <Pressable
+        onPressIn={onIn}
+        onPressOut={onOut}
+        onPress={() => onPress?.(item)}
+        style={[styles.memberCard, { backgroundColor: COLORS.bgCard, borderColor: COLORS.borderBlue }]}
+      >
+
+
+        <View style={[
+          styles.memberAvatar,
+          { backgroundColor: item.sexe === "homme" ? "rgba(52, 152, 219, 0.2)" : "rgba(233, 30, 99, 0.2)" }
+        ]}>
           <Text style={styles.memberEmoji}>{emoji}</Text>
         </View>
+
         <View style={styles.memberInfo}>
-          <Text style={styles.memberName}>{item.name}</Text>
-          <Text style={styles.memberRole}>{item.role}</Text>
-          <Text style={styles.memberRole}>{item.adress}</Text>
+          <Text style={[styles.memberName, { color: COLORS.textPrimary }]}>{item.name}</Text>
+          <Text style={[styles.memberRole, { color: COLORS.textSecondary }]}>{item.role}</Text>
+          <Text style={[styles.memberRole, { color: COLORS.textSecondary }]}>{item.adress}</Text>
           <View style={styles.memberBadges}>
-            <View style={[styles.badge, item.status=='actif' ? styles.badgeActive : styles.badgeInactive]}>
-              <Text style={[styles.badgeText, { color: item.status=="actif" ? COLORS.success : COLORS.danger }]}>
-                {item.status=="actif" ? "Actif" : "Inactif"}
+            <View style={[styles.badge, item.status == 'actif' ? styles.badgeActive : styles.badgeInactive]}>
+              <Text style={[styles.badgeText, { color: item.status == "actif" ? COLORS.success : COLORS.danger }]}>
+                {item.status == "actif" ? "Actif" : "Inactif"}
               </Text>
             </View>
           </View>
         </View>
-        <Text style={styles.memberArrow}>›</Text>
+        <Text style={[styles.memberArrow, { color: COLORS.textMuted }]}>›</Text>
       </Pressable>
     </Animated.View>
   );

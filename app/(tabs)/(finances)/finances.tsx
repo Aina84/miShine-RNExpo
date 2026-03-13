@@ -3,57 +3,70 @@
  * Stack: React Native Expo + Tamagui + expo-linear-gradient + react-native-chart-kit
  */
 
-import { FinancesHeader } from "./components/FinancesHeader";
-import { HeroTotalCard } from "./components/HeroTotalCard";
-import { ChartCard } from "./components/ChartCard";
-import { TypeFilters } from "./components/TypeFilters";
-import { FinancesFab } from "./components/FinancesFab";
-import { COLORS } from "@/app/utils/styles";
+import { useAppColors, useAppStyles } from "@/app/utils/styles";
+import { useAppTheme } from "@/lib/context/ThemeContext";
+import { financeRepository } from "@/lib/repository/databaseRepositories";
 import { LinearGradient } from "expo-linear-gradient";
-import { TransactionItem, TransactionItemType } from "./components/TransactionItem";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
-  FlatList,
-  Platform,
-  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
+import { AddFinanceCard } from "./components/AddFinanceCard";
+import { ChartCard } from "./components/ChartCard";
+import { FinanceDetailCard } from "./components/FinanceDetailCard";
+import { FinancesFab } from "./components/FinancesFab";
+import { FinancesHeader } from "./components/FinancesHeader";
+import { HeroTotalCard } from "./components/HeroTotalCard";
+import { TransactionItem, TransactionItemType } from "./components/TransactionItem";
+import { TypeFilters } from "./components/TypeFilters";
+
 
 const { width: SCREEN_W } = Dimensions.get("window");
-// ... other imports
-const TRANSACTIONS : TransactionItemType[] = [
-  { id: "1", icon: "💚", type: "income",  name: "Dîme du mois de Juin",          cat: "Dîme",     date: "16 juin 2025", amount: "+45 000", xaf: true  },
-  { id: "2", icon: "🙏", type: "income",  name: "Offrande Culte Dominical",       cat: "Offrande", date: "15 juin 2025", amount: "+28 500", xaf: true  },
-  { id: "3", icon: "🎁", type: "income",  name: "Don spécial – Construction",     cat: "Don",      date: "14 juin 2025", amount: "+18 000", xaf: true  },
-  { id: "4", icon: "💸", type: "expense", name: "Achats fournitures culte",       cat: "Dépense",  date: "12 juin 2025", amount: "-7 500",  xaf: true  },
-  { id: "5", icon: "🙏", type: "income",  name: "Offrande Jeune de prière",       cat: "Offrande", date: "11 juin 2025", amount: "+12 000", xaf: true  },
-  { id: "6", icon: "💚", type: "income",  name: "Dîme semaine 22",               cat: "Dîme",     date: "8 juin 2025",  amount: "+22 000", xaf: true  },
-  { id: "7", icon: "💸", type: "expense", name: "Facture électricité",            cat: "Dépense",  date: "5 juin 2025",  amount: "-15 000", xaf: true  },
-];
-
 const TYPE_FILTERS = [
-  { key: "all",      label: "Tout",     icon: "📊" },
-  { key: "dime",     label: "Dîme",    icon: "💚" },
+  { key: "all", label: "Tout", icon: "📊" },
+  { key: "dime", label: "Dîme", icon: "💚" },
   { key: "offrande", label: "Offrande", icon: "🙏" },
-  { key: "don",      label: "Don",      icon: "🎁" },
-  { key: "depense",  label: "Dépense",  icon: "💸" },
+  { key: "don", label: "Don", icon: "🎁" },
+  { key: "depense", label: "Dépense", icon: "💸" },
 ];
-
-const CHART_DATA = {
-  labels: ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun"],
-  datasets: [{ data: [42, 58, 51, 73, 68, 91.5] }],
-};
 
 export default function FinancesScreen() {
+  const COLORS = useAppColors();
+  const { isDark } = useAppTheme();
+  const appStyles = useAppStyles();
+
   const [activeType, setActiveType] = useState("all");
+  const [transactions, setTransactions] = useState<TransactionItemType[]>([]);
+  const [isAddCardVisible, setAddCardVisible] = useState(false);
+
   const headerFade = useRef(new Animated.Value(0)).current;
   const heroSlide = useRef(new Animated.Value(30)).current;
+
+  const [selectedFinance, setSelectedFinance] = useState<any | null>(null);
+  const [showFinanceDetail, setShowFinanceDetail] = useState(false);
+
+
+  const fetchTransactions = async () => {
+    try {
+      const data = await financeRepository.findAll();
+      setTransactions(data.reverse() as unknown as TransactionItemType[]);
+    } catch (error) {
+      console.error("Failed to fetch finances:", error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTransactions();
+    }, [])
+  );
 
   useEffect(() => {
     Animated.parallel([
@@ -62,60 +75,118 @@ export default function FinancesScreen() {
     ]).start();
   }, []);
 
-  const filtered = TRANSACTIONS.filter((t) => {
+  const filtered = transactions.filter((t) => {
     if (activeType === "all") return true;
     if (activeType === "depense") return t.type === "expense";
-    return t.cat.toLowerCase().includes(activeType);
+    return t.category?.toLowerCase().includes(activeType);
   });
 
+  const handleFinancePress = (finance: any) => {
+    setSelectedFinance(finance);
+    setShowFinanceDetail(true);
+  };
+
+
+  const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0);
+  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + Number(t.amount), 0);
+
+  const generateChartData = () => {
+    const monthlyIncome: Record<string, number> = {};
+    const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+
+    transactions.forEach(t => {
+      if (t.type === 'income' && t.date) {
+        const dateParts = t.date.split(" ");
+        let monthName = "";
+        if (dateParts.length >= 2) {
+          monthName = dateParts[1].substring(0, 3).toLowerCase();
+        }
+
+        const matchedMonth = months.find(m => m.toLowerCase() === monthName || m.toLowerCase().startsWith(monthName));
+        if (matchedMonth) {
+          monthlyIncome[matchedMonth] = (monthlyIncome[matchedMonth] || 0) + Number(t.amount);
+        }
+      }
+    });
+
+    const data = months.map(m => monthlyIncome[m] || 0);
+    return {
+      labels: months,
+      datasets: [{ data }]
+    };
+  };
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} />
-      <LinearGradient colors={[COLORS.bg, "#0C1530", COLORS.bg]} style={StyleSheet.absoluteFill} />
+    <View style={[styles.container, { backgroundColor: COLORS.bg }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={COLORS.bg} />
+      <LinearGradient colors={isDark ? [COLORS.bg, "#0C1530", COLORS.bg] : [COLORS.bg, "#F0F2F5", COLORS.bg]} style={StyleSheet.absoluteFill} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Header */}
         <FinancesHeader headerFade={headerFade} />
 
-        {/* Hero Total Card */}
-        <HeroTotalCard heroSlide={heroSlide} />
+        {/* Hero Card */}
+        <HeroTotalCard totalIncome={totalIncome} totalExpense={totalExpense} heroSlide={heroSlide} />
 
-        {/* Bar Chart */}
-        <ChartCard screenWidth={SCREEN_W} chartData={CHART_DATA} />
+        {/* Chart */}
+        <ChartCard chartData={generateChartData()} screenWidth={SCREEN_W} />
 
-        {/* Type Filters */}
+        {/* Filters */}
         <TypeFilters typeFilters={TYPE_FILTERS} activeType={activeType} setActiveType={setActiveType} />
 
-        {/* Transactions */}
-        <Text style={styles.sectionLabel}>Transactions récentes</Text>
-        {filtered.map((item, index) => (
-          <TransactionItem key={item.id} item={item} index={index} />
-        ))}
-
+        {/* Transactions list */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: COLORS.textPrimary }]}>Récentes Transactions</Text>
+          {filtered.map((t, i) => (
+            <TransactionItem key={t.id || i} item={t} index={i} onPress={() => handleFinancePress(t)} />
+          ))}
+          {filtered.length === 0 && (
+            <View style={styles.empty}>
+              <Text style={{ color: COLORS.textMuted }}>Aucune transaction trouvée</Text>
+            </View>
+          )}
+        </View>
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* FAB */}
-      <FinancesFab />
+      <FinancesFab onPress={() => setAddCardVisible(true)} />
+
+      <AddFinanceCard
+        visible={isAddCardVisible}
+        onClose={() => setAddCardVisible(false)}
+        onFinanceAdded={() => {
+          setAddCardVisible(false);
+          fetchTransactions();
+        }}
+      />
+
+      <FinanceDetailCard
+        open={showFinanceDetail}
+        onOpenChange={setShowFinanceDetail}
+        finance={selectedFinance}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bg },
-  scroll: { paddingBottom: 20 },
-
-
-
-
-
-
-
-
-  sectionLabel: {
-    fontSize: 10.5, fontWeight: "700", color: COLORS.textSecondary,
-    letterSpacing: 2, textTransform: "uppercase",
-    paddingHorizontal: 20, marginBottom: 12,
+  container: {
+    flex: 1,
   },
-
+  scroll: {
+    paddingBottom: 20,
+  },
+  section: {
+    padding: 20,
+  },
+  sectionLabel: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 15,
+  },
+  empty: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  }
 });

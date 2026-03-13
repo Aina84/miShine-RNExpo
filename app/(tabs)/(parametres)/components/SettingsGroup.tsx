@@ -5,7 +5,7 @@
 
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { COLORS } from "../../../utils/styles";
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 interface SettingsGroupProps {
   title: string;
@@ -13,10 +13,11 @@ interface SettingsGroupProps {
 }
 
 export function SettingsGroup({ title, children }: SettingsGroupProps) {
+  const COLORS = useAppColors();
   return (
     <View style={styles.group}>
-      <Text style={styles.groupLabel}>{title}</Text>
-      <View style={styles.groupCard}>{children}</View>
+      <Text style={[styles.groupLabel, { color: COLORS.textMuted }]}>{title}</Text>
+      <View style={[styles.groupCard, { backgroundColor: COLORS.bgCard, borderColor: COLORS.borderBlue }]}>{children}</View>
     </View>
   );
 }

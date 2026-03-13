@@ -5,7 +5,7 @@
 
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
-import { COLORS } from "../../../utils/styles";
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 interface ReportFiltersProps {
   filters: string[];
@@ -14,15 +14,16 @@ interface ReportFiltersProps {
 }
 
 export function ReportFilters({ filters, activeFilter, setActiveFilter }: ReportFiltersProps) {
+  const COLORS = useAppColors();
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
       {filters.map((f) => (
         <Pressable
           key={f}
-          style={[styles.filterChip, activeFilter === f && styles.filterChipActive]}
+          style={[styles.filterChip, { borderColor: COLORS.borderBlue }, activeFilter === f && { backgroundColor: COLORS.gold, borderColor: COLORS.gold }]}
           onPress={() => setActiveFilter(f)}
         >
-          <Text style={[styles.filterText, activeFilter === f && styles.filterTextActive]}>{f}</Text>
+          <Text style={[styles.filterText, { color: COLORS.textSecondary }, activeFilter === f && styles.filterTextActive]}>{f}</Text>
         </Pressable>
       ))}
     </ScrollView>

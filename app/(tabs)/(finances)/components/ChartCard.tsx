@@ -6,7 +6,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { BarChart } from "react-native-chart-kit";
-import { COLORS } from "../../../utils/styles";
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 interface ChartCardProps {
   screenWidth: number;
@@ -17,15 +17,16 @@ interface ChartCardProps {
 }
 
 export function ChartCard({ screenWidth, chartData }: ChartCardProps) {
+  const COLORS = useAppColors();
   return (
-    <View style={styles.chartCard}>
-      <Text style={styles.chartTitle}>Évolution mensuelle (k XAF)</Text>
+    <View style={[styles.chartCard, { backgroundColor: COLORS.bgCard, borderColor: COLORS.borderBlue }]}>
+      <Text style={styles.chartTitle}>Évolution mensuelle (k Ar)</Text>
       <BarChart
         data={chartData}
         width={screenWidth - 64}
         height={150}
         yAxisLabel=""
-        yAxisSuffix="k"
+        yAxisSuffix="ar"
         chartConfig={{
           backgroundGradientFrom: "#0E1A38",
           backgroundGradientFromOpacity: 0,
@@ -54,8 +55,8 @@ const styles = StyleSheet.create({
   chartCard: {
     marginHorizontal: 20, marginBottom: 16,
     backgroundColor: COLORS.bgCard, borderRadius: 18,
-    padding: 16, borderWidth: 1, borderColor: COLORS.borderBlue,
+    padding: 16, borderWidth: 1, borderColor: COLORS.borderBlue, paddingBottom: 30
   },
-  chartTitle: { fontSize: 13, fontWeight: "600", color: COLORS.textSecondary, marginBottom: 12 },
+  chartTitle: { fontSize: 13, fontWeight: "600", color: COLORS.textSecondary, marginBottom: 12, },
   barChart: { marginLeft: -8, borderRadius: 12 },
 });

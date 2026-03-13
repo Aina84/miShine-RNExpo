@@ -6,15 +6,15 @@
       "@/*": ["./*"] 
     },
     "types": [
-      "tamagui",  // ← Garde ça
-      "react",    // ← Ajoute react explicitement
-      "react-native"  // ← Ajoute react-native
+      "tamagui",
+      "react",    
+      "react-native" 
     ],
-    "jsx": "react-native",  // ← Déjà dans expo/tsconfig.base mais explicite
-    "moduleResolution": "bundler",  // ← Important pour Tamagui
+    "jsx": "react-native",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "skipLibCheck": true  // ← Évite les erreurs de types dans node_modules
+    "skipLibCheck": true
   },
   "include": [
     "**/*.ts",

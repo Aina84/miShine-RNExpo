@@ -20,18 +20,6 @@ export const sheeps = sqliteTable('sheeps', {
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 })
 
-export const reports = sqliteTable('reports', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  title: text('title'),
-  type: text('type'),
-  desc: text('description'),
-  date: text('date'),
-  offering: text('offering'),
-  dim: integer('dim').default(0),
-  totalPresent: integer('present').default(0),
-  totalNews: integer('news').default(0),
-  author: text('auteur')  
-})
 export const rapports = sqliteTable('rapports', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   title: text('title'),
@@ -42,7 +30,7 @@ export const rapports = sqliteTable('rapports', {
   dim: integer('dim').default(0),
   totalPresent: integer('present').default(0),
   totalNews: integer('news').default(0),
-  author: text('auteur')  
+  author: text('auteur')
 })
 
 export const activities = sqliteTable('activities', {
@@ -52,3 +40,15 @@ export const activities = sqliteTable('activities', {
   time: text('time').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 })
+
+export const finances = sqliteTable('finances', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  type: text('type'),
+  category: text('category'),
+  name: text('name'),
+  amount: integer('amount'),
+  date: text('date'),
+  icon: text('icon'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+})
+

@@ -1,43 +1,46 @@
-/**
- * eTaiza – Membres Screen
- * Stack: React Native Expo + Tamagui + expo-linear-gradient
- */
-
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   FlatList,
-  Pressable,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
-  View,
+  View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
-import { MemberCard, Member } from "./components/MemberCard";
-import { MembresHeader } from "./components/MembresHeader";
-import { SearchBar } from "./components/SearchBar";
+import { MemberCard } from "./components/MemberCard";
+import { MemberDetailCard } from "./components/MemberDetailCard";
 import { MemberFilters } from "./components/MemberFilters";
 import { MembresFab } from "./components/MembresFab";
+import { MembresHeader } from "./components/MembresHeader";
+import { SearchBar } from "./components/SearchBar";
 
-import { COLORS } from "../../utils/styles";
+import { AddSheepCard } from "@/components/shared/AddSheepCard";
+import { useAppTheme } from "@/lib/context/ThemeContext";
 import { db } from "@/lib/database/db";
 import { sheeps } from "@/lib/database/schema";
-import { AddSheepCard } from "@/components/shared/AddSheepCard";
+import { useAppColors, useAppStyles } from "../../utils/styles";
 
-const FILTERS = ["Tous", "Actifs", "Inactifs",'Chorals', 'Securités', 'Interceseurs', 'Accueils', 'Diakona', 'Assistants', 'Staffs', 'Tsotra'];
+const FILTERS = ["Tous", "Actifs", "Inactifs", 'Chorals', 'Securités', 'Interceseurs', 'Accueils', 'Diakona', 'Assistants', 'Staffs', 'Tsotra'];
 
 export default function MembresScreen() {
+  const COLORS = useAppColors();
+  const { isDark } = useAppTheme();
+  // We use useAppStyles but we also have local StyleSheet for native components
+  const appStyles = useAppStyles();
+
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tous");
   const headerAnim = useRef(new Animated.Value(0)).current;
   const [members, setMembers] = useState<any[]>([])
   const [showAddSheepCard, setShowAddSheepCard] = useState<boolean | null>(null)
+  const [OnUserAdded, setOnUserAdded] = useState<boolean | null>(null)
 
-  useEffect(()=>{
+  const [selectedMember, setSelectedMember] = useState<any | null>(null);
+  const [showMemberDetail, setShowMemberDetail] = useState(false);
+
+  useEffect(() => {
     async function fetchMember() {
       try {
         const data = await db.select().from(sheeps).all();
@@ -47,29 +50,36 @@ export default function MembresScreen() {
       }
     }
     fetchMember();
-  },[])
+    setOnUserAdded(null);
+  }, [OnUserAdded])
 
   useEffect(() => {
     Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
   }, []);
 
   const filtered = members.filter((r) => {
-    if (activeFilter === "Tous") return true;
-    return r.role.toLowerCase() === activeFilter.toLowerCase();
+    const matchesFilter = activeFilter === "Tous" || r.role?.toLowerCase() === activeFilter.toLowerCase();
+    const matchesQuery = !query || r.name?.toLowerCase().includes(query.toLowerCase());
+    return matchesFilter && matchesQuery;
   });
 
+  const handleMemberPress = (member: any) => {
+    setSelectedMember(member);
+    setShowMemberDetail(true);
+  };
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} />
-      <LinearGradient colors={[COLORS.bg, "#0C1530", COLORS.bg]} style={StyleSheet.absoluteFill} />
+    <View style={[styles.container, { backgroundColor: COLORS.bg }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={COLORS.bg} />
+      <LinearGradient colors={isDark ? [COLORS.bg, "#0C1530", COLORS.bg] : [COLORS.bg, "#F0F2F5", COLORS.bg]} style={StyleSheet.absoluteFill} />
 
-        <AddSheepCard
-          visible={showAddSheepCard==true}
-          onClose={()=>setShowAddSheepCard(null)}
-          onUserAdded={()=>setShowAddSheepCard(null)}
-        ></AddSheepCard>      
+      <AddSheepCard
+        visible={showAddSheepCard == true}
+        onClose={() => setShowAddSheepCard(null)}
+        onUserAdded={() => { setShowAddSheepCard(null); setOnUserAdded(true) }}
+      ></AddSheepCard>
 
-      <MembresHeader headerAnim={headerAnim} />
+      <MembresHeader onLoad={() => { }} headerAnim={headerAnim} />
 
       <SearchBar query={query} setQuery={setQuery} />
 
@@ -78,33 +88,64 @@ export default function MembresScreen() {
       <FlatList
         data={filtered}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item, index }) => <MemberCard item={item} index={index} />}
+        renderItem={({ item, index }) => (
+          <MemberCard
+            item={item}
+            index={index}
+            onPress={handleMemberPress}
+          />
+        )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyIcon}>🔍</Text>
-            <Text style={styles.emptyText}>Aucun membre trouvé</Text>
+            <Text style={[styles.emptyText, { color: COLORS.textSecondary }]}>Aucun membre trouvé</Text>
           </View>
         }
         ListFooterComponent={
-          <Text style={styles.listFooter}>
+          <Text style={[styles.listFooter, { color: COLORS.textMuted }]}>
             {filtered.length} résultat{filtered.length > 1 ? "s" : ""} affiché{filtered.length > 1 ? "s" : ""}
           </Text>
         }
       />
+      <MembresFab onPress={() => { setShowAddSheepCard(true) }} />
 
-      <MembresFab onPress={()=>{setShowAddSheepCard(value => value = true)}}/>
+      <MemberDetailCard
+        open={showMemberDetail}
+        onOpenChange={setShowMemberDetail}
+        member={selectedMember}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bg },
-  listContent: { paddingHorizontal: 10, paddingBottom: 100 },
-  emptyState: { alignItems: "center", paddingTop: 60 },
-  emptyIcon: { fontSize: 40, marginBottom: 12 },
-  emptyText: { fontSize: 14, color: COLORS.textSecondary },
-  listFooter: { textAlign: "center", fontSize: 12, color: COLORS.textMuted, paddingVertical: 16 },
-
+  container: {
+    flex: 1,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 100,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+  },
+  emptyIcon: {
+    fontSize: 40,
+    marginBottom: 10,
+  },
+  emptyText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  listFooter: {
+    textAlign: 'center',
+    paddingVertical: 20,
+    fontSize: 12,
+    opacity: 0.6,
+  }
 });

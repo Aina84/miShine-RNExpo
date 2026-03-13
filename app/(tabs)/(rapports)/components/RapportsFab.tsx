@@ -7,21 +7,23 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { COLORS } from "../../../utils/styles";
+import { View } from "tamagui";
 
 export function RapportsFab({ onPress }: { onPress?: () => void }) {
   return (
-    <Pressable style={styles.fabWrap} onPress={onPress}>
-      <LinearGradient colors={[COLORS.goldLight, COLORS.goldDim]} style={styles.fab}>
+    <View style={styles.fabWrap}>
+    <Pressable style={styles.fab} onPress={onPress}>
+      <LinearGradient colors={[COLORS.goldLight, COLORS.goldDim]}>
         <Text style={styles.fabIcon}>📝</Text>
-        <Text style={styles.fabLabel}>Nouveau Rapport</Text>
       </LinearGradient>
     </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fabWrap: { position: "relative", bottom:0, borderRadius: 16, overflow: "hidden" },
-  fab: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16 },
-  fabIcon: { fontSize: 18 },
-  fabLabel: { fontSize: 14, fontWeight: "700", color: "#080F24" },
+  fabWrap: { position: "absolute", bottom:50, alignSelf:'center', width:"17%"},
+  fab: { overflow: "hidden", borderRadius:"50%" },
+  fabGrad: { flexDirection: "row", alignItems: "center", justifyContent: "center", },
+  fabIcon: { fontSize: 27, margin:10 },
 });

@@ -1,19 +1,20 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { COLORS } from "../../../utils/styles"; // Assuming COLORS is defined here
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 export type TransactionItemType = {
-  id: string;
+  id: number | string;
   icon: string;
-  type: "income" | "expense";
+  type: "income" | "expense" | string;
   name: string;
-  cat: string;
+  category: string;
   date: string;
-  amount: string;
-  xaf: boolean;
+  amount: number | string;
 };
 
-export function TransactionItem({ item, index }: { item: TransactionItemType; index: number }) {
+export function TransactionItem({ item, index, onPress }: { item: TransactionItemType; index: number; onPress?: (item: TransactionItemType) => void }) {
+  const COLORS = useAppColors();
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(16)).current;
 
@@ -26,16 +27,17 @@ export function TransactionItem({ item, index }: { item: TransactionItemType; in
 
   return (
     <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-      <Pressable style={styles.transactionItem}>
+      <Pressable style={[styles.transactionItem, { backgroundColor: COLORS.bgCard, borderColor: COLORS.borderBlue }]} onPress={() => onPress?.(item)}>
+
         <View style={[styles.transIcon, { backgroundColor: item.type === "income" ? "rgba(52,201,138,.1)" : "rgba(231,76,60,.1)" }]}>
           <Text style={styles.transIconText}>{item.icon}</Text>
         </View>
         <View style={styles.transInfo}>
-          <Text style={styles.transName}>{item.name}</Text>
-          <Text style={styles.transMeta}>{item.cat} · {item.date}</Text>
+          <Text style={[styles.transName, { color: COLORS.textPrimary }]}>{item.name}</Text>
+          <Text style={[styles.transMeta, { color: COLORS.textMuted }]}>{item.category} · {item.date}</Text>
         </View>
         <Text style={[styles.transAmount, { color: item.type === "income" ? COLORS.success : COLORS.danger }]}>
-          {item.amount}{item.xaf ? " XAF" : ""}
+          {item.type === "income" ? "+" : "-"}{item.amount.toLocaleString()} Ar
         </Text>
       </Pressable>
     </Animated.View>

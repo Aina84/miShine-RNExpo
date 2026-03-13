@@ -1,8 +1,7 @@
-import { COLORS, styles } from "@/app/utils/styles";
-import { useEffect, useRef } from "react";
-import { Pressable } from "react-native";
-import { Animated } from "react-native";
+import { useAppColors, useAppStyles } from "@/app/utils/styles";
 import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useRef } from "react";
+import { Animated, Pressable } from "react-native";
 import { Text, View } from "tamagui";
 
 interface ActionButtonProps {
@@ -20,6 +19,8 @@ export function ActionButton({
   delay,
   onPress,
 }: ActionButtonProps) {
+  const styles = useAppStyles();
+  const COLORS = useAppColors();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
   const pressAnim = useRef(new Animated.Value(1)).current;

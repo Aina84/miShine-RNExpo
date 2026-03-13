@@ -17,7 +17,6 @@ export function MembresFab({onPress}: {onPress: ()=>void}) {
           style={styles.fabGrad}
         >
           <Text style={styles.fabIcon}>➕</Text>
-          <Text style={styles.fabLabel}>Ajouter Brebis</Text>
         </LinearGradient>
       </Pressable>
     </View>
@@ -25,9 +24,8 @@ export function MembresFab({onPress}: {onPress: ()=>void}) {
 }
 
 const styles = StyleSheet.create({
-  fabWrap: { position: "relative", bottom: 0 },
-  fab: { borderRadius: 16, overflow: "hidden" },
+  fabWrap: { position: "absolute", bottom:50, alignSelf:'center', width:"17%"},
+  fab: { overflow: "hidden", borderRadius:"50%"},
   fabGrad: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16 },
   fabIcon: { fontSize: 18 },
-  fabLabel: { fontSize: 14, fontWeight: "700", color: "#080F24" },
 });

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../database/db";
-import { activities, reports, sheeps, users } from "../database/schema";
+import { activities, finances, rapports, sheeps, users } from "../database/schema";
 
 export class Repository<T extends { id: number }> {
     constructor(protected table: any) { }
@@ -29,5 +29,6 @@ export class Repository<T extends { id: number }> {
 
 export const userRepository = new Repository(users);
 export const sheepRepository = new Repository(sheeps);
-export const reportRepository = new Repository(reports);
+export const reportRepository = new Repository(rapports);
 export const activityRepository = new Repository(activities);
+export const financeRepository = new Repository(finances);

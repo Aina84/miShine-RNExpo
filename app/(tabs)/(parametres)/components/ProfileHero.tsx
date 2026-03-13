@@ -3,26 +3,31 @@
  * Stack: React Native Expo + Tamagui + expo-linear-gradient
  */
 
+import { useAppTheme } from "@/lib/context/ThemeContext";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { COLORS } from "../../../utils/styles";
+import { COLORS, useAppColors } from "../../../utils/styles";
 import { Badge } from "./Badge";
 
 interface ProfileHeroProps {
   fadeAnim: Animated.Value;
   profileSlide: Animated.Value;
+  userName?: string;
+  userEmail?: string;
 }
 
-export function ProfileHero({ fadeAnim, profileSlide }: ProfileHeroProps) {
+export function ProfileHero({ fadeAnim, profileSlide, userName, userEmail }: ProfileHeroProps) {
+  const COLORS = useAppColors();
+  const { isDark } = useAppTheme();
   return (
     <Animated.View style={[{ opacity: fadeAnim, transform: [{ translateY: profileSlide }] }]}>
       <View style={styles.profileHero}>
         <LinearGradient
-          colors={["#0E1A38", "#162040"]}
+          colors={isDark ? ["#0E1A38", "#162040"] : ["#FFFFFF", "#F0F2F5"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
+          style={[StyleSheet.absoluteFill, { borderColor: COLORS.borderBlue, borderWidth: 1, borderRadius: 22 }]}
         />
         {/* Top accent */}
         <View style={styles.heroAccentLine} />
@@ -34,12 +39,13 @@ export function ProfileHero({ fadeAnim, profileSlide }: ProfileHeroProps) {
           >
             <Text style={styles.profileAvText}>👨‍💼</Text>
           </LinearGradient>
-          <Text style={styles.profileName}>Pasteur Thomas Mbarga</Text>
-          <Text style={styles.profileRole}>Responsable principal · Église Grâce Divine</Text>
+          <Text style={[styles.profileName, { color: COLORS.textPrimary }]}>{userName || "Pasteur"}</Text>
+          <Text style={[styles.profileRole, { color: COLORS.textSecondary }]}>{userEmail || "Responsable principal · Église *****"}</Text>
+
 
           <View style={styles.profileChips}>
-            <Badge label="Administrateur" color={COLORS.gold}   bg="rgba(232,169,35,.12)" border="rgba(232,169,35,.2)" />
-            <Badge label="Yaoundé, CMR"   color={COLORS.accent} bg="rgba(74,127,229,.12)" border="rgba(74,127,229,.2)" />
+            <Badge label="Administrateur" color={COLORS.gold} bg="rgba(232,169,35,.12)" border="rgba(232,169,35,.2)" />
+            <Badge label="Madagascar" color={COLORS.accent} bg="rgba(74,127,229,.12)" border="rgba(74,127,229,.2)" />
           </View>
 
           <Pressable style={styles.editProfileBtn}>

@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1771409511454,
-      "tag": "0000_keen_kid_colt",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1772557905698,
-      "tag": "0002_public_sabra",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1772559141602,
-      "tag": "0003_whole_nova",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1772577348942,
-      "tag": "0005_natural_emma_frost",
+      "when": 1773339948094,
+      "tag": "0000_parched_virginia_dare",
       "breakpoints": true
     }
   ]

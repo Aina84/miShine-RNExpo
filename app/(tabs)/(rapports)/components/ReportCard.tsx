@@ -4,28 +4,33 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { COLORS } from "../../../utils/styles";
+import { Animated, Pressable, StyleSheet } from "react-native";
+import { Text, View } from "tamagui";
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 export type ReportType = "culte" | "dime" | "offrande" | "autre";
 
 const TYPE_META: Record<ReportType, { bg: string; color: string; border: string }> = {
-  culte:    { bg: "rgba(74,127,229,.15)",  color: "#4A7FE5", border: "rgba(74,127,229,.25)"   },
-  dime:     { bg: "rgba(232,169,35,.12)",  color: "#E8A923", border: "rgba(232,169,35,.2)"    },
-  offrande: { bg: "rgba(52,201,138,.12)",  color: "#34C98A", border: "rgba(52,201,138,.2)"    },
-  autre:    { bg: "rgba(168,74,229,.12)",  color: "#A84AE5", border: "rgba(168,74,229,.2)"    },
+  culte: { bg: "rgba(74,127,229,.15)", color: "#4A7FE5", border: "rgba(74,127,229,.25)" },
+  dime: { bg: "rgba(232,169,35,.12)", color: "#E8A923", border: "rgba(232,169,35,.2)" },
+  offrande: { bg: "rgba(52,201,138,.12)", color: "#34C98A", border: "rgba(52,201,138,.2)" },
+  autre: { bg: "rgba(168,74,229,.12)", color: "#A84AE5", border: "rgba(168,74,229,.2)" },
 };
 
 interface ReportCardProps {
   report: {
-    id: string; type: ReportType; typeLbl: string;
+    id: any; type: ReportType; typeLbl: string;
     title: string; desc: string; date: string;
     amount: string; author: string;
   };
   index: number;
+  onPress?: (report: any) => void;
 }
 
-export function ReportCard({ report, index }: ReportCardProps) {
+export function ReportCard({ report, index, onPress }: ReportCardProps) {
+
+  const COLORS = useAppColors();
+
   const meta = TYPE_META[report.type];
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(22)).current;
@@ -41,31 +46,34 @@ export function ReportCard({ report, index }: ReportCardProps) {
   return (
     <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }, { scale: pressAnim }] }}>
       <Pressable
-        style={styles.reportCard}
+        style={[styles.reportCard, { backgroundColor: COLORS.bgCard, borderColor: COLORS.borderBlue }]}
         onPressIn={() => Animated.spring(pressAnim, { toValue: 0.97, useNativeDriver: true }).start()}
         onPressOut={() => Animated.spring(pressAnim, { toValue: 1, useNativeDriver: true }).start()}
+
+        onPress={() => onPress?.(report)}
       >
+
         {/* Top row */}
         <View style={styles.cardTop}>
           <View style={[styles.typeBadge, { backgroundColor: meta.bg, borderColor: meta.border }]}>
             <Text style={[styles.typeBadgeText, { color: meta.color }]}>{report.typeLbl}</Text>
           </View>
-          <Text style={styles.cardDate}>{report.date}</Text>
+          <Text style={[styles.cardDate, { color: COLORS.textMuted }]}>{report.date}</Text>
         </View>
 
-        <Text style={styles.cardTitle}>{report.title}</Text>
-        <Text style={styles.cardDesc}>{report.desc}</Text>
+        <Text style={[styles.cardTitle, { color: COLORS.textPrimary }]}>{report.title}</Text>
+        <Text style={[styles.cardDesc, { color: COLORS.textSecondary }]}>{report.desc}</Text>
 
         {/* Footer */}
         <View style={styles.cardFooter}>
-          <Text style={[styles.cardAmount, report.amount !== "—" && { color: COLORS.gold }]}>
+          <Text style={[styles.cardAmount, { color: COLORS.textMuted }, report.amount !== "—" && { color: COLORS.gold }]}>
             {report.amount}
           </Text>
           <View style={styles.authorRow}>
             <View style={styles.authorAvatar}>
               <Text style={{ fontSize: 10 }}>👤</Text>
             </View>
-            <Text style={styles.authorName}>{report.author}</Text>
+            <Text style={[styles.authorName, { color: COLORS.textMuted }]}>{report.author}</Text>
           </View>
         </View>
 

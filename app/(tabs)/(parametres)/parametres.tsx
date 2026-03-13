@@ -3,46 +3,59 @@
  * Stack: React Native Expo + Tamagui + expo-linear-gradient
  */
 
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
-  Platform,
-  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
-  Switch,
   Text,
-  View,
+  View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
-import { COLORS } from "../../utils/styles";
-import { SettingItem, SettingItemProps } from "./components/SettingItem";
-import { SettingsGroup } from "./components/SettingsGroup";
+import { authService, User } from "@/lib/services/authService";
+import * as FileSystem from 'expo-file-system/legacy';
+
+import { useAppColors, useAppStyles } from "@/app/utils/styles";
+import { useAppTheme } from "@/lib/context/ThemeContext";
+import { useRouter } from "expo-router";
+import * as Sharing from 'expo-sharing';
+
 import { Arrow } from "./components/Arrow";
-import { ToggleSwitch } from "./components/ToggleSwitch";
 import { Badge } from "./components/Badge";
+import { LogoutButton } from "./components/LogoutButton";
 import { ParametresHeader } from "./components/ParametresHeader";
 import { ProfileHero } from "./components/ProfileHero";
-import { LogoutButton } from "./components/LogoutButton";
-
-
-
+import { SettingItem } from "./components/SettingItem";
+import { SettingsGroup } from "./components/SettingsGroup";
+import { ToggleSwitch } from "./components/ToggleSwitch";
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export default function ParametresScreen() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [notifPush, setNotifPush] = useState(true);
   const [notifCulte, setNotifCulte] = useState(true);
   const [notifWeekly, setNotifWeekly] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const { theme, toggleTheme, isDark } = useAppTheme();
+  const styles = useAppStyles();
+  const COLORS = useAppColors();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
   const profileSlide = useRef(new Animated.Value(30)).current;
 
+
   useEffect(() => {
+    async function loadUser() {
+      const u = await authService.getCurrentUser();
+      setUser(u);
+    }
+    loadUser();
+
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.spring(profileSlide, { toValue: 0, delay: 100, useNativeDriver: true, tension: 70, friction: 12 }),
@@ -52,25 +65,71 @@ export default function ParametresScreen() {
   const handleLogout = () => {
     Alert.alert(
       "Se déconnecter",
-      "Voulez-vous vraiment vous déconnecter de eTaiza ?",
+      "Voulez-vous vraiment vous déconnecter de miShine ?",
       [
         { text: "Annuler", style: "cancel" },
-        { text: "Déconnecter", style: "destructive", onPress: () => console.log("Logout") },
+        {
+          text: "Déconnecter",
+          style: "destructive",
+          onPress: async () => {
+            await authService.logout();
+            router.replace("/");
+          }
+        },
       ]
     );
   };
 
+  const handleExportDB = async () => {
+    try {
+      const dbPath = `${FileSystem.documentDirectory}SQLite/app2.db`;
+      const fileInfo = await FileSystem.getInfoAsync(dbPath);
+
+      if (!fileInfo.exists) {
+        Alert.alert("Erreur", "Base de données introuvable.");
+        return;
+      }
+
+      const isSharingAvailable = await Sharing.isAvailableAsync();
+      if (!isSharingAvailable) {
+        Alert.alert("Erreur", "Le partage n'est pas disponible sur cet appareil.");
+        return;
+      }
+
+      await Sharing.shareAsync(dbPath, {
+        mimeType: 'application/x-sqlite3',
+        dialogTitle: 'Sauvegarder les données eTaiza',
+        UTI: 'public.database'
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      Alert.alert("Erreur", "Impossible d'exporter les données.");
+    }
+  };
+
+
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} />
-      <LinearGradient colors={[COLORS.bg, "#0C1530", COLORS.bg]} style={StyleSheet.absoluteFill} />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={COLORS.bg} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+
+      <LinearGradient colors={isDark ? [COLORS.bg, "#0C1530", COLORS.bg] : [COLORS.bg, "#FFFFFF", COLORS.bg]} style={StyleSheet.absoluteFill} />
+
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
         {/* Header */}
         <ParametresHeader fadeAnim={fadeAnim} />
 
         {/* Profile Hero */}
-        <ProfileHero fadeAnim={fadeAnim} profileSlide={profileSlide} />
+        <ProfileHero
+          fadeAnim={fadeAnim}
+          profileSlide={profileSlide}
+          userName={user?.name}
+          userEmail={user?.email}
+        />
+
 
         {/* ── Église ── */}
         <SettingsGroup title="Église">
@@ -138,13 +197,16 @@ export default function ParametresScreen() {
         <SettingsGroup title="Affichage">
           <SettingItem
             icon="🌙" iconBg="rgba(74,127,229,.12)" label="Mode sombre"
-            right={<ToggleSwitch value={darkMode} onChange={setDarkMode} />}
+            right={<ToggleSwitch value={isDark} onChange={toggleTheme} />}
           />
+
           <SettingItem
             icon="🌍" iconBg="rgba(74,127,229,.12)" label="Langue"
             right={
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Text style={styles.settingValue}>Français</Text>
+
+
                 <Arrow />
               </View>
             }
@@ -158,8 +220,9 @@ export default function ParametresScreen() {
           <SettingItem
             icon="💾" iconBg="rgba(255,255,255,.06)" label="Sauvegarder les données"
             right={<Arrow />}
-            onPress={() => console.log("Backup")}
+            onPress={handleExportDB}
           />
+
           <SettingItem
             icon="🔄" iconBg="rgba(52,201,138,.12)" label="Synchronisation"
             right={
@@ -171,10 +234,12 @@ export default function ParametresScreen() {
             onPress={() => console.log("Sync")}
           />
           <SettingItem
-            icon="ℹ️" iconBg="rgba(74,127,229,.12)" label="À propos d'eTaiza"
+            icon="ℹ️" iconBg="rgba(74,127,229,.12)" label="À propos de miShine"
             right={
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Text style={styles.versionText}>v1.0.0</Text>
+
+
                 <Arrow />
               </View>
             }
@@ -186,7 +251,9 @@ export default function ParametresScreen() {
         {/* Logout */}
         <LogoutButton handleLogout={handleLogout} />
 
-        <Text style={styles.footer}>eTaiza v1.0.0 · Fait avec ✝ pour l'Église</Text>
+        <Text style={styles.footer}>miShine v1.0.0 · Fait avec ✝ pour l'Église</Text>
+
+
 
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -194,22 +261,4 @@ export default function ParametresScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bg },
-  scroll: { paddingBottom: 20 },
 
-
-
-
-
-
-
-  settingValue: { fontSize: 13, color: COLORS.textSecondary },
-  versionText: { fontSize: 12, color: COLORS.textMuted },
-
-
-
-
-
-  footer: { textAlign: "center", fontSize: 11, color: COLORS.textMuted, paddingBottom: 8 },
-});

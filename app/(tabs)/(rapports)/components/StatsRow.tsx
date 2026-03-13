@@ -4,8 +4,10 @@
  */
 
 import React from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
-import { COLORS } from "../../../utils/styles";
+import { Animated, StyleSheet } from "react-native";
+import { Text, View } from "tamagui";
+
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 interface Stat {
   icon: string;
@@ -19,6 +21,7 @@ interface StatsRowProps {
 }
 
 export function StatsRow({ stats, headerFade }: StatsRowProps) {
+  const COLORS = useAppColors();
   return (
     <View style={styles.statsRow}>
       {stats.map((s) => (
@@ -29,12 +32,14 @@ export function StatsRow({ stats, headerFade }: StatsRowProps) {
             {
               opacity: headerFade,
               transform: [{ translateY: headerFade.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }],
+              backgroundColor: COLORS.bgCard,
+              borderColor: COLORS.borderBlue,
             },
           ]}
         >
           <Text style={styles.statIcon}>{s.icon}</Text>
-          <Text style={styles.statVal}>{s.val}</Text>
-          <Text style={styles.statLbl}>{s.lbl}</Text>
+          <Text style={[styles.statVal, { color: COLORS.textPrimary }]}>{s.val}</Text>
+          <Text style={[styles.statLbl, { color: COLORS.textSecondary }]}>{s.lbl}</Text>
         </Animated.View>
       ))}
     </View>

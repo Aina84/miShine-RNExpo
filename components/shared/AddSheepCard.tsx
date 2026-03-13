@@ -1,5 +1,6 @@
 import { db } from '@/lib/database/db'
 import { sheeps } from '@/lib/database/schema'
+import { activityService } from '@/lib/services/activityService'
 import { Check, ChevronDown, ChevronUp, X } from '@tamagui/lucide-icons'
 import React, { useState } from 'react'
 import {
@@ -81,6 +82,10 @@ export function AddSheepCard({ visible, onClose, onUserAdded }: AddSheepCardProp
         status: form.status,
       })
 
+      // Log activity
+      await activityService.logActivity("👤", `Nouveau membre : ${form.name}`);
+
+
       console.log('Succès ! La personne a été ajoutée avec succès')
 
       const dataTest = await db.select().from(sheeps)
@@ -130,7 +135,6 @@ export function AddSheepCard({ visible, onClose, onUserAdded }: AddSheepCardProp
         >
           <ScrollView showsVerticalScrollIndicator={false}>
             <YStack gap="$4">
-              {/* En-tête avec bouton de fermeture */}
               <XStack justifyContent="space-between" alignItems="center">
                 <YStack>
                   <H4 color="$color" fontWeight="700">
@@ -266,7 +270,7 @@ export function AddSheepCard({ visible, onClose, onUserAdded }: AddSheepCardProp
                       </Sheet>
                     </Adapt>
 
-                    <Select.Content zIndex={200000}>
+                    <Select.Content >
                       <Select.ScrollUpButton
                         alignItems="center"
                         justifyContent="center"
@@ -340,7 +344,7 @@ export function AddSheepCard({ visible, onClose, onUserAdded }: AddSheepCardProp
                       </Sheet>
                     </Adapt>
 
-                    <Select.Content zIndex={200000}>
+                    <Select.Content>
                       <Select.ScrollUpButton
                         alignItems="center"
                         justifyContent="center"
@@ -422,7 +426,7 @@ export function AddSheepCard({ visible, onClose, onUserAdded }: AddSheepCardProp
                       </Sheet>
                     </Adapt>
 
-                    <Select.Content zIndex={200000}>
+                    <Select.Content>
                       <Select.ScrollUpButton
                         alignItems="center"
                         justifyContent="center"

@@ -1,5 +1,7 @@
 import { db } from '@/lib/database/db'
-import { rapports, reports } from '@/lib/database/schema'
+import { rapports } from '@/lib/database/schema'
+import { activityService } from '@/lib/services/activityService'
+
 import { Check, ChevronDown, X } from '@tamagui/lucide-icons'
 import React, { useState } from 'react'
 import {
@@ -96,6 +98,10 @@ export function AddReportCard({ visible, onClose, onReportAdded }: AddReportCard
         author: form.author || "Admin"
       })
 
+      // Log activity
+      await activityService.logActivity("📋", `Nouveau rapport : ${form.title}`);
+
+
       console.log('Succès ! Le rapport a été ajouté avec succès')
       resetForm()
       onClose()
@@ -189,7 +195,8 @@ export function AddReportCard({ visible, onClose, onReportAdded }: AddReportCard
                       </Sheet>
                     </Adapt>
 
-                    <Select.Content zIndex={200000}>
+                    <Select.Content>
+
                       <Select.Viewport minWidth={200}>
                         <Select.Group>
                           <Select.Label>Types</Select.Label>

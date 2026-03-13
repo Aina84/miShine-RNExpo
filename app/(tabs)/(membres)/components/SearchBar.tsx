@@ -4,8 +4,9 @@
  */
 
 import React from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { COLORS } from "../../../utils/styles";
+import { Pressable, StyleSheet, Text } from "react-native";
+import { Input, View } from "tamagui";
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 interface SearchBarProps {
   query: string;
@@ -13,13 +14,15 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ query, setQuery }: SearchBarProps) {
+  const COLORS = useAppColors();
   return (
-    <View style={styles.searchWrap}>
+    <View style={[styles.searchWrap, { backgroundColor: COLORS.bgCard, borderColor: COLORS.borderBlue }]}>
       <Text style={styles.searchIcon}>🔍</Text>
-      <TextInput
+      <Input
         style={styles.searchInput}
         placeholder="Rechercher un membre..."
-        placeholderTextColor={COLORS.textMuted}
+        placeholderTextColor={COLORS.textMuted as any}
+        color={COLORS.textPrimary as any}
         value={query}
         onChangeText={setQuery}
       />

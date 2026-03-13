@@ -3,9 +3,9 @@
  * Stack: React Native Expo + Tamagui
  */
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { COLORS } from "../../../utils/styles";
+import { COLORS, useAppColors } from "../../../utils/styles";
 
 export interface SettingItemProps {
   icon: string;
@@ -17,6 +17,7 @@ export interface SettingItemProps {
 }
 
 export function SettingItem({ icon, iconBg, label, right, onPress, isLast }: SettingItemProps) {
+  const COLORS = useAppColors();
   const pressAnim = useRef(new Animated.Value(1)).current;
   const onIn = () => Animated.spring(pressAnim, { toValue: 0.98, useNativeDriver: true }).start();
   const onOut = () => Animated.spring(pressAnim, { toValue: 1, useNativeDriver: true }).start();
@@ -33,7 +34,7 @@ export function SettingItem({ icon, iconBg, label, right, onPress, isLast }: Set
           <View style={[styles.siIconWrap, { backgroundColor: iconBg }]}>
             <Text style={styles.siIcon}>{icon}</Text>
           </View>
-          <Text style={styles.siLabel}>{label}</Text>
+          <Text style={[styles.siLabel, { color: COLORS.textPrimary }]}>{label}</Text>
           <View style={styles.siRight}>{right}</View>
         </Pressable>
       </Animated.View>

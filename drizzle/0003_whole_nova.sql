@@ -1,1 +1,0 @@
-ALTER TABLE `sheeps` ADD `status` text;
