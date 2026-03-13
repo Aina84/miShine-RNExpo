@@ -1,6 +1,5 @@
 /**
- * eTaiza – Report Card Component
- * Stack: React Native Expo + Tamagui
+ * MiShine – Report Card Component
  */
 
 import React, { useEffect, useRef } from "react";
@@ -88,7 +87,7 @@ const styles = StyleSheet.create({
   reportCard: {
     backgroundColor: COLORS.bgCard, borderRadius: 16,
     borderWidth: 1, borderColor: COLORS.borderBlue,
-    padding: 16, marginHorizontal: 20, marginBottom: 11,
+    padding: 10, marginHorizontal: 20, marginBottom: 11,
     overflow: "hidden",
   },
   cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
@@ -96,7 +95,7 @@ const styles = StyleSheet.create({
   typeBadgeText: { fontSize: 10, fontWeight: "700" },
   cardDate: { fontSize: 11, color: COLORS.textMuted },
   cardTitle: { fontSize: 15, fontWeight: "700", color: COLORS.textPrimary, marginBottom: 6 },
-  cardDesc: { fontSize: 12.5, color: COLORS.textSecondary, lineHeight: 19, marginBottom: 12 },
+  cardDesc: { fontSize: 12.5, color: COLORS.textSecondary, lineHeight: 19, marginBottom: 12, height:20, textOverflow:'hidden' },
   cardFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   cardAmount: { fontSize: 15, fontWeight: "800", color: COLORS.textMuted },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 6 },

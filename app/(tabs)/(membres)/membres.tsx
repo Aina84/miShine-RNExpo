@@ -22,12 +22,11 @@ import { db } from "@/lib/database/db";
 import { sheeps } from "@/lib/database/schema";
 import { useAppColors, useAppStyles } from "../../utils/styles";
 
-const FILTERS = ["Tous", "Actifs", "Inactifs", 'Chorals', 'Securités', 'Interceseurs', 'Accueils', 'Diakona', 'Assistants', 'Staffs', 'Tsotra'];
+const FILTERS = ["Tous", "Actif", "Inactif", 'Choral', 'Securité', 'Interceseur', 'Accueil', 'Diakona', 'Assistant', 'Staff', 'Tsotra'];
 
 export default function MembresScreen() {
   const COLORS = useAppColors();
   const { isDark } = useAppTheme();
-  // We use useAppStyles but we also have local StyleSheet for native components
   const appStyles = useAppStyles();
 
   const [query, setQuery] = useState("");
@@ -58,7 +57,7 @@ export default function MembresScreen() {
   }, []);
 
   const filtered = members.filter((r) => {
-    const matchesFilter = activeFilter === "Tous" || r.role?.toLowerCase() === activeFilter.toLowerCase();
+    const matchesFilter = activeFilter === "Tous" || r.role?.toLowerCase() === activeFilter.toLowerCase() || r.status?.toLowerCase() === activeFilter.toLowerCase();
     const matchesQuery = !query || r.name?.toLowerCase().includes(query.toLowerCase());
     return matchesFilter && matchesQuery;
   });

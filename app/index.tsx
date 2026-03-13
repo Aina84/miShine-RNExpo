@@ -44,7 +44,6 @@ export default function index() {
         style={StyleSheet.absoluteFill}
       />
       <YStack rowGap={20} ai="center">
-        <Text fontSize={40} fontWeight={600} color="white">welcome <Hand size={40} color={'orange'}></Hand></Text>
         <Image style={{ width: 100, height: 100, alignSelf: 'center' }} source={require('../assets/images/icon.png')}></Image>
         <Button
           backgroundColor={COLORS.gold}

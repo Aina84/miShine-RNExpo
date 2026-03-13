@@ -1,6 +1,5 @@
 /**
- * eTaiza – Membres Header Component
- * Stack: React Native Expo + Tamagui
+ * miShine – Membres Header Component
  */
 
 import React, { useEffect, useState } from "react";

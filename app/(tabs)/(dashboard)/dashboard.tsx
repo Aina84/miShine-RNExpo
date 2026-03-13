@@ -107,7 +107,7 @@ export default function DashboardScreen() {
         },
         {
           id: "offerings",
-          label: "Offrandes Cumulées",
+          label: "Solde de Compte",
           value: `${(totalAmount).toLocaleString('fr-FR')} Ar`,
           delta: offeringDeltaText,
           deltaPositive: offeringDeltaPositive,
