@@ -1,50 +1,84 @@
-# Welcome to your Expo app 👋
+# miShine 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern, high-performance mobile application built with **Expo**, **Tamagui**, and **Drizzle ORM**. **miShine** is designed to provide a seamless user experience for managing dashboard activities, finances, members, and reports.
 
-## Get started
+## 🚀 Key Features
 
-1. Install dependencies
+- **Dashboard**: Real-time overview of activities and key statistics.
+- **Finances Management**: Track transactions, manage budgets, and visualize financial growth.
+- **Member Directory**: Efficiently manage member profiles, contact information, and roles.
+- **Reports & Analytics**: Generate comprehensive reports and gain insights from data visualizations.
+- **Settings & Customization**: Personalized themes, account settings, and application preferences.
+- **Authentication**: Secure user login and registration flow.
+- **Local Persistence**: Fast and reliable local data storage using Drizzle ORM and Expo SQLite.
 
-   ```bash
-   npm install
-   ```
+## 🛠 Tech Stack
 
-2. Start the app
+- **Framework**: [Expo](https://expo.dev/) (React Native)
+- **UI Components**: [Tamagui](https://tamagui.dev/) (Styling and Component library)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Database**: [Drizzle ORM](https://orm.drizzle.team/) with [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/)
+- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
+- **Icons**: [Lucide Icons](https://lucide.dev/) (via Tamagui)
+- **Networking**: [Axios](https://axios-http.com/)
 
-   ```bash
-   npx expo start
-   ```
+## 📦 Getting Started
 
-In the output, you'll find options to open the app in a
+### 1. Prerequisites
+
+Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the app
+
+```bash
+npx expo start
+```
+
+In the output, you'll find options to open the app in a:
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Expo Go](https://expo.dev/go)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🏗 Project Structure
 
-## Get a fresh project
+- `app/`: Main application screens and routing (using Expo Router).
+  - `(auth)`: Authentication related screens.
+  - `(tabs)`: Bottom tab navigation flows (Dashboard, Finances, Members, etc.).
+- `components/`: Reusable UI components.
+- `lib/`: Business logic, services, and utilities.
+  - `services/`: API and authentication services.
+- `store/`: Zustand state management.
+- `drizzle/`: Database migrations and schema definitions.
+- `assets/`: Images, fonts, and other static assets.
 
-When you're ready, run:
+## 🧪 Development
+
+### Linting
 
 ```bash
-npm run reset-project
+npm run lint
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Database Migrations
 
-## Learn more
+This project uses Drizzle Kit for migrations.
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npx drizzle-kit generate
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🤝 Community
 
-## Join the community
+Join the Expo community to learn more:
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo documentation](https://docs.expo.dev/)
+- [Discord community](https://chat.expo.dev)
+- [Expo on GitHub](https://github.com/expo/expo)
